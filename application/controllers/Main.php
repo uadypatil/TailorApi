@@ -74,38 +74,46 @@ class Main extends CI_Controller
                         $tailordata = array(
                             "authid" => $authid,
                             "name" => $formdata['name'],
-                            "document_type" => $formdata['document_type'],
-                            "shop_license" => $formdata['shop_license'],
-                            "address" => $formdata['address']
+                            "document_type" => $formdata['document_type']
                         );
 
-                        $config['upload_path'] = 'uploads/tailor/documents';
-                        $config['allowed_types'] = 'gif|jpg|jpeg|png|pdf'; // Adjust as needed
-                        $config['max_size'] = 102400;
+                        if (isset($formdata['shop_license'])) {
+                            $tailordata["shop_license"] = $formdata['shop_license'];
+                        }
+
+
+                        $config['upload_path'] = 'uploads/tailor/documents
+                        ';
+                        $config['allowed_types'] = 'jpg|jpeg|png|gif';
+                        $config['max_size'] = 51200; // 50 MB in KB
                         $this->load->library('upload', $config);
                         $this->upload->initialize($config);
+
+                        $data = []; // Initialize an array to hold the response data
+
+                        // Check if a file is uploaded
 
                         if (isset($_FILES["document"])) {
                             if (!$this->upload->do_upload('document')) {
                                 $data['error'] = $this->upload->display_errors();
-                                // print_r($data);
+                                print_r($data);
                             } else {
                                 $data['upload_data'] = $this->upload->data();
                                 $tailordata['document'] = $data['upload_data']['file_name'];
                             }
                         }
 
+
                         $returned = $this->MainModel->setTailorDataPost($tailordata);
                     } else if ($formdata['type'] == "user") {
                         // adding userdata to array
                         $userdata = array(
                             "authid" => $authid,
-                            "name" => $formdata['name'],
-                            "address" => $formdata['address'],
+                            "name" => $formdata['name']
                         );
 
                         $returned = $this->MainModel->setUserDataPost($userdata);
-                    }else{
+                    } else {
                         $returned = -3;
                     }
                 }
