@@ -73,8 +73,8 @@ class Main extends CI_Controller
                         // adding tailor data to array
                         $tailordata = array(
                             "authid" => $authid,
+                            "name" => $formdata['name'],
                             "document_type" => $formdata['document_type'],
-                            "document" => $formdata['document'],
                             "shop_license" => $formdata['shop_license'],
                             "address" => $formdata['address']
                         );
@@ -105,6 +105,8 @@ class Main extends CI_Controller
                         );
 
                         $returned = $this->MainModel->setUserDataPost($userdata);
+                    }else{
+                        $returned = -3;
                     }
                 }
             }
@@ -114,6 +116,8 @@ class Main extends CI_Controller
                 $response = array("status" => "Error", "message" => "Contact number already exist");
             } else if ($returned === -2) {
                 $response = array("status" => "Error", "message" => "Email already exist");
+            } else if ($returned === -3) {
+                $response = array("status" => "Error", "message" => "Invalid User");
             } else if ($returned != null) {
                 $this->output->set_status_header(200);
                 $response = array("status" => "Success", "message" => "Registration Successfull");
