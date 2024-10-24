@@ -111,19 +111,21 @@ class TailorModel extends CI_Model
         $status = $this->db->update("auth", array(
             "password" => $this->MainModel->encryptData($newpass)
         ));
-        
+
         return $status;
     }   // function ends
 
     // function to contact with admin for tailor
-    function addConactUsPost($data){
-        $status = $this->db->insert("contact" ,$data);
-        return $status; 
+    function addConactUsPost($data)
+    {
+        $status = $this->db->insert("contactform", $data);
+        return $status;
     }   // function ends
 
     // ////////////////////////////////////////////////// orders or appointments
     // function to get count of pending orders
-    function getCountPendingOrdersByTailorId($id){
+    function getCountPendingOrdersByTailorId($id)
+    {
         $this->db->where("tialorid", $id);
         $this->db->where("bookingstatus", "pending");
         $count = $this->db->count_all("appointments");
@@ -131,7 +133,8 @@ class TailorModel extends CI_Model
     }   // function ends
 
     // function to get approved orders
-    function getApprovedOrdersCountByTailorId($id){
+    function getApprovedOrdersCountByTailorId($id)
+    {
         $this->db->where("tailorid", $id);
         $this->db->where("bookingstatus", "approved");
         $count = $this->db->count_all("appointments");
@@ -139,7 +142,8 @@ class TailorModel extends CI_Model
     }   // function ends
 
     // function to get completed orders
-    function getCompletedOrdersCountByTailorId($id){
+    function getCompletedOrdersCountByTailorId($id)
+    {
         $this->db->where("tailorid", $id);
         $this->db->where("completestatus", "completed");
         $count = $this->db->count_all("appointments");
@@ -147,41 +151,43 @@ class TailorModel extends CI_Model
     }   // funtion ends
 
     // function to get calculated user rating 
-    function getTotalUserRatingByTailorId($id){
+    function getTotalUserRatingByTailorId($id)
+    {
         $this->db->select("sum(stars) as starssum");
         $this->db->from("review");
         $this->db->where("tailorid", $id);
         $sum = $this->db->get();
-        $totalrating = $sum->starssum/5;
+        $totalrating = $sum->starssum / 5;
         return $totalrating;
     }
 
 
     // funciton to get appointments list
-    function getAppointmentsByTailorId($id){
+    function getAppointmentsByTailorId($id)
+    {
         $this->db->where("tailorid", $id);
         $data = $this->db->get("appointments")->result();
-        if($data != null){
+        if ($data != null) {
             return $data;
-        }else{
+        } else {
             return null;
         }
     }   // function ends
 
-    // function to approve/ reject appointment
 
     //////////////////////////////////////////////////////// user reviews
     // function to get all reviews
-    function getAllReviewsByTailorId($id){
+    function getAllReviewsByTailorId($id)
+    {
         $this->db->select("user.*, auth.*, review.*");
         $this->db->from("review");
         $this->db->join("user", "user.id = review.userid");
         $this->db->join("auth", "user.authid = auth.id");
         $this->db->where("review.tailorid", $id);
         $data = $this->db->get()->result();
-        if($data != null){
+        if ($data != null) {
             return $data;
-        }else{
+        } else {
             return null;
         }
     }   // function ends
