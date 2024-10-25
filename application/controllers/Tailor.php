@@ -12,7 +12,7 @@ class Tailor extends CI_Controller
     function __construct()
     {
         parent::__construct();
-        $this->load->model("TailorModel");
+        $this->load->model("MainModel");
         $this->load->model("TailorModel");
 
         // auto create admin user
