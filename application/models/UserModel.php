@@ -39,7 +39,7 @@ class UserModel extends CI_Model
     function updateUserData($userid, $data){
         $this->db->where("id", $userid);
         $this->db->set($data);
-        $status = $this->db->update("usre");
+        $status = $this->db->update("user");
         return $status;
     }   // function ends
 
@@ -72,7 +72,7 @@ class UserModel extends CI_Model
 
     // function to get single tailor data with faqs 
     function getTailorDataById($tailorid){
-        $this->db->select("tialor.*, auth.*");
+        $this->db->select("tailor.*, auth.*");
         $this->db->from("tailor");
         $this->db->join("auth", "auth.id = tailor.authid");
         $this->db->where("tailor.id", $tailorid);
@@ -86,7 +86,7 @@ class UserModel extends CI_Model
 
     // function to get faqs for tailor
     function getTailorFaqsByTailorId($tailorid){
-        $this->db->where("tailorid", $tailorid);
+        $this->db->where("tailor_id", $tailorid);
         $data = $this->db->get("faqs")->result();
         if($data != null){
             return $data;
@@ -120,8 +120,37 @@ class UserModel extends CI_Model
         }
     }   // functione ends
 
-    // function to  
+    // function to book an appointment
+    function bookAppointment($data){
+        $status = $this->db->insert("appointments", $data);
+        return $status;
+    }   // function ends
+    
 
+    // function to get appointment by id
+    function getAppintmentById($id){
+        $this->db->where("id", $id);
+        $data = $this->db->get("appointments")->row();
+        if($data){
+            return $data;
+        }else{
+            return null;
+        }
+    }   // function ends
+
+    // function to update the appointment
+    function updateAppintment($id, $data){
+        $this->db->where("id", $id);
+        $this->db->set($data);
+        $status = $this->db->update("appointments");
+        return $status;
+    }   // function ends
+
+    // function to add feedback form
+    function addFeedbackPost($data){
+        $status = $this->db->insert("feedback", $data);
+        return $status;
+    }   // function ends
 
 
     

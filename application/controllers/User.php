@@ -22,6 +22,166 @@ class User extends CI_Controller
         $this->load->library('phpmailer_lib');
     }
 
+    /////////////////////////////////////////////////////////////////   user profile
+    // Function to get user profile data
+    function getUserProfileData($id)
+    {
+        $data = $this->UserModel->getUserProfileData($id);
+        if ($data != null) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "Success", "data" => $data);
+        } else {
+            $this->output->set_status_header(404);
+            $response = array("status" => "Error", "message" => "User not found");
+        }
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    // Function to update user authentication data
+    function updateUserAuthData($authId)
+    {
+        $data = $this->input->post();
+        $status = $this->UserModel->updateUserAuthData($authId, $data);
+        if ($status) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "Success", "message" => "User authentication updated");
+        } else {
+            $this->output->set_status_header(400);
+            $response = array("status" => "Error", "message" => "Failed to update authentication data");
+        }
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    // Function to update user data
+    function updateUserData($userId)
+    {
+        $data = $this->input->post();
+        $status = $this->UserModel->updateUserData($userId, $data);
+        if ($status) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "Success", "message" => "User data updated");
+        } else {
+            $this->output->set_status_header(400);
+            $response = array("status" => "Error", "message" => "Failed to update user data");
+        }
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    // Function to update password
+    function updateUserPassword($authId)
+    {
+        $oldPass = $this->input->post('oldpass');
+        $newPass = $this->input->post('newpass');
+        $status = $this->UserModel->updateUserPassword($authId, $oldPass, $newPass);
+        if ($status) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "Success", "message" => "Password updated");
+        } else {
+            $this->output->set_status_header(400);
+            $response = array("status" => "Error", "message" => "Failed to update password");
+        }
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends    
+
+    ///////////////////////////////////////////////////////////////////     Tailor profile data
+    // Function to get experienced tailor data
+    function getExperiencedTailorData()
+    {
+        $data = $this->UserModel->getExperiencedTailorData();
+        $response = ($data) ?
+            array("status" => "Success", "data" => $data) :
+            array("status" => "Error", "message" => "No experienced tailors found");
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    // Function to get tailor data by ID
+    function getTailorDataById($tailorId)
+    {
+        $data = $this->UserModel->getTailorDataById($tailorId);
+        $response = ($data) ?
+            array("status" => "Success", "data" => $data) :
+            array("status" => "Error", "message" => "Tailor not found");
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    // Function to get FAQs for a tailor
+    function getTailorFaqsByTailorId($tailorId)
+    {
+        $data = $this->UserModel->getTailorFaqsByTailorId($tailorId);
+        $response = ($data) ?
+            array("status" => "Success", "data" => $data) :
+            array("status" => "Error", "message" => "No FAQs found for this tailor");
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    // Function to get tailor reviews
+    function getTailorReviewsByTailorId($tailorId)
+    {
+        $data = $this->UserModel->getTailorReviewsByTailorId($tailorId);
+        $response = ($data) ?
+            array("status" => "Success", "data" => $data) :
+            array("status" => "Error", "message" => "No reviews found for this tailor");
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    ////////////////////////////////////////////////////////////////////        appointments
+    // Function to get appointments by user ID
+    function getAppointmentsByUserId($userId)
+    {
+        $data = $this->UserModel->getAppointmentsByUserId($userId);
+        $response = ($data) ?
+            array("status" => "Success", "data" => $data) :
+            array("status" => "Error", "message" => "No appointments found");
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    // Function to book an appointment
+    function bookAppointment()
+    {
+        $data = $this->input->post();
+        $status = $this->UserModel->bookAppointment($data);
+        $response = ($status) ?
+            array("status" => "Success", "message" => "Appointment booked successfully") :
+            array("status" => "Error", "message" => "Failed to book appointment");
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    // Function to get an appointment by ID
+    function getAppointmentById($id)
+    {
+        $data = $this->UserModel->getAppintmentById($id);
+        $response = ($data) ?
+            array("status" => "Success", "data" => $data) :
+            array("status" => "Error", "message" => "Appointment not found");
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    // Function to update an appointment
+    function updateAppointment($id)
+    {
+        $data = $this->input->post();
+        $status = $this->UserModel->updateAppintment($id, $data);
+        $response = ($status) ?
+            array("status" => "Success", "message" => "Appointment updated") :
+            array("status" => "Error", "message" => "Failed to update appointment");
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    //////////////////////////////////////////////////////////////////////      feedback form
+    // Function to add feedback
+    function addFeedbackPost()
+    {
+        $data = $this->input->post();
+        $status = $this->UserModel->addFeedbackPost($data);
+        $response = ($status) ?
+            array("status" => "Success", "message" => "Feedback submitted successfully") :
+            array("status" => "Error", "message" => "Failed to submit feedback");
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends    
+
+
+
+
 
 
 
