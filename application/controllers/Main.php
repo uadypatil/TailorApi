@@ -82,8 +82,7 @@ class Main extends CI_Controller
                         }
 
 
-                        $config['upload_path'] = 'uploads/tailor/documents
-                        ';
+                        $config['upload_path'] = 'uploads/tailor/documents';
                         $config['allowed_types'] = 'jpg|jpeg|png|gif';
                         $config['max_size'] = 51200; // 50 MB in KB
                         $this->load->library('upload', $config);
@@ -144,7 +143,6 @@ class Main extends CI_Controller
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Forgot Password Functions
-
     function SendResetPasswordLink()
     {
         $email = $this->input->post("email");
@@ -257,4 +255,96 @@ class Main extends CI_Controller
     }
 
     // reset password ends
+
+
+    // function to send otp
+    function sendOTP()
+    {
+        $email = $this->input->post("email");
+
+        if (!$this->MainModel->isMailExist($email)) {
+            $otp = $this->generateOTP();
+            $expires_at = date("Y-m-d H:i:s", strtotime('+3 minute'));
+
+            if ($this->MainModel->addOTP($email, $otp, $expires_at)) {
+                $mail = $this->phpmailer_lib->load();
+                $mail->isSMTP();
+                $mail->Host = 'smtp.gmail.com';
+                $mail->SMTPAuth = true;
+                $mail->Username = 'amplifierlover007@gmail.com'; // Your email
+                $mail->Password = 'irjw yygg kfni dnue'; // Your email password
+                $mail->SMTPSecure = 'tls'; // 'tls' for port 587
+                $mail->Port = 587; // Port for 'tls'
+                $mail->setFrom('amplifierlover007@gmail.com', 'Team Sevakalpak');
+                $mail->addAddress($email);
+
+                $mail->Subject = 'Mail Varification by Team Sevakalpak';
+                $mail->isHTML(true);
+
+                $mailContent = "<h1>Here is the OTP</h1>
+                <h3>for varifying your mail</h3>
+              <p>Your OTP for varifying mail is: <strong>{$otp}</strong>. Do not share the otp to any one</p>
+              
+              <p>Thank You</p>
+              <p>Best Regards</p>
+              <h3>Team SevaKalpak</h3>";
+                $mail->Body = $mailContent;
+
+                try {
+                    if ($mail->send()) {
+                        $this->output
+                            ->set_content_type('application/json')
+                            ->set_status_header(200)
+                            ->set_output(json_encode(array("status"=>"success", 'message'=>'OTP is mailed')));
+                    } else {
+                        $this->output
+                            ->set_content_type('application/json')
+                            ->set_status_header(500)
+                            ->set_output(json_encode(['error' => 'Failed to send password reset link.']));
+                    }
+                } catch (Exception $e) {
+                    $this->output
+                        ->set_content_type('application/json')
+                        ->set_status_header(500)
+                        ->set_output(json_encode(['error' => 'Failed to send password reset link.', 'details' => $mail->ErrorInfo]));
+                }
+            } else {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(500)
+                    ->set_output(json_encode(['error' => 'Failed to store reset token.']));
+            }
+        } else {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode(['error' => 'Mail already exists.']));
+        }
+    }
+
+    // function to authenticate otp
+    function AuthenticateOTP(){
+        $email = $this->input->post("email");
+        $otp = $this->input->post("otp");
+
+        $status = $this->MainModel->matchOTP($email, $otp);
+        if($status){
+            $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(200)
+                ->set_output(json_encode(['message' => 'OTP matched']));
+        }else{
+            $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(500)
+                ->set_output(json_encode(['message' => 'OTP not matched']));
+        }
+    }
+
+    // function to generate otp
+    function generateOTP()
+    {
+        $randomnum = rand(1000, 9999);
+        return $randomnum;
+    }   // function ends
 }

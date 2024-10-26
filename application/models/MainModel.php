@@ -196,4 +196,50 @@ class MainModel extends CI_Model
         $this->db->delete("passwordresettokens");
     }
     //      reset password ends
+
+    // function to save otp in otptabe
+    function addOTP($mail, $otp, $expires_at){
+        $status = $this->db->insert("otptable", array(
+            "email"=>$mail,
+            "otp"=>$otp,
+            "expires_at"=>$expires_at
+        ));
+
+        return $status;
+    }   //  function ends
+
+    // function to match otp
+    function matchOTP($email, $otp){
+        $this->db->where("email", $email);
+        $this->db->where("otp", $otp);
+        $data = $this->db->get("otptable")->row();
+
+        if($data){
+            return true;
+        }else{
+            return false;
+        }
+    }   // function ends
+
+    // function to delete generated otp
+    function deleteOTP($email){
+        $this->db->where("email",$email);
+        $status = $this->db->delete("otptable");
+        return $status; 
+    }   // function ends
+
+    // function to check mail exists or not
+    function isMailExist($email){
+        $this->db->where("email", $email);
+        $status = $this->db->get("auth")->row();
+        if($status){
+            return true;
+        }else{
+            return false;
+        }
+    }   // function ends
+
+
+
+
 }
