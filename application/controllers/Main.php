@@ -258,86 +258,97 @@ class Main extends CI_Controller
 
 
     // function to send otp
-    function sendOTP()
+    function SendOTP()
     {
         $email = $this->input->post("email");
 
-        if (!$this->MainModel->isMailExist($email)) {
-            $otp = $this->generateOTP();
-            $expires_at = date("Y-m-d H:i:s", strtotime('+3 minute'));
+        if ($email != null || $email != "") {
 
-            if ($this->MainModel->addOTP($email, $otp, $expires_at)) {
-                $mail = $this->phpmailer_lib->load();
-                $mail->isSMTP();
-                $mail->Host = 'smtp.gmail.com';
-                $mail->SMTPAuth = true;
-                $mail->Username = 'amplifierlover007@gmail.com'; // Your email
-                $mail->Password = 'irjw yygg kfni dnue'; // Your email password
-                $mail->SMTPSecure = 'tls'; // 'tls' for port 587
-                $mail->Port = 587; // Port for 'tls'
-                $mail->setFrom('amplifierlover007@gmail.com', 'Team Sevakalpak');
-                $mail->addAddress($email);
+            if (!$this->MainModel->isMailExist($email)) {
+                $otp = $this->generateOTP();
+                $expires_at = date("Y-m-d H:i:s", strtotime('+3 minute'));
 
-                $mail->Subject = 'Mail Varification by Team Sevakalpak';
-                $mail->isHTML(true);
+                if ($this->MainModel->addOTP($email, $otp, $expires_at)) {
+                    $mail = $this->phpmailer_lib->load();
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'amplifierlover007@gmail.com'; // Your email
+                    $mail->Password = 'irjw yygg kfni dnue'; // Your email password
+                    $mail->SMTPSecure = 'tls'; // 'tls' for port 587
+                    $mail->Port = 587; // Port for 'tls'
+                    $mail->setFrom('amplifierlover007@gmail.com', 'Team Sevakalpak');
+                    $mail->addAddress($email);
 
-                $mailContent = "<h1>Here is the OTP</h1>
+                    $mail->Subject = 'Mail Varification by Team Sevakalpak';
+                    $mail->isHTML(true);
+
+                    $mailContent = "<h1>Here is the OTP</h1>
                 <h3>for varifying your mail</h3>
               <p>Your OTP for varifying mail is: <strong>{$otp}</strong>. Do not share the otp to any one</p>
               
               <p>Thank You</p>
               <p>Best Regards</p>
               <h3>Team SevaKalpak</h3>";
-                $mail->Body = $mailContent;
+                    $mail->Body = $mailContent;
 
-                try {
-                    if ($mail->send()) {
-                        $this->output
-                            ->set_content_type('application/json')
-                            ->set_status_header(200)
-                            ->set_output(json_encode(array("status"=>"success", 'message'=>'OTP is mailed')));
-                    } else {
+                    try {
+                        if ($mail->send()) {
+                            $this->output
+                                ->set_content_type('application/json')
+                                ->set_status_header(200)
+                                ->set_output(json_encode(array("status" => "success", 'message' => 'OTP is mailed', "success" => true)));
+                        } else {
+                            $this->output
+                                ->set_content_type('application/json')
+                                ->set_status_header(500)
+                                ->set_output(json_encode(array('error' => 'Failed to send password reset link.', "success" => false)));
+                        }
+                    } catch (Exception $e) {
                         $this->output
                             ->set_content_type('application/json')
                             ->set_status_header(500)
-                            ->set_output(json_encode(['error' => 'Failed to send password reset link.']));
+                            ->set_output(json_encode(['error' => 'Failed to send password reset link.', 'details' => $mail->ErrorInfo]));
                     }
-                } catch (Exception $e) {
+                } else {
                     $this->output
                         ->set_content_type('application/json')
                         ->set_status_header(500)
-                        ->set_output(json_encode(['error' => 'Failed to send password reset link.', 'details' => $mail->ErrorInfo]));
+                        ->set_output(json_encode(['error' => 'Failed to store reset token.']));
                 }
             } else {
                 $this->output
                     ->set_content_type('application/json')
                     ->set_status_header(500)
-                    ->set_output(json_encode(['error' => 'Failed to store reset token.']));
+                    ->set_output(json_encode(['error' => 'Mail already exists.']));
             }
         } else {
             $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(500)
-                ->set_output(json_encode(['error' => 'Mail already exists.']));
+                ->set_output(json_encode(['error' => 'Empty mail passed, please fill mail']));
         }
     }
 
     // function to authenticate otp
-    function AuthenticateOTP(){
+    function AuthenticateOTP()
+    {
         $email = $this->input->post("email");
         $otp = $this->input->post("otp");
 
         $status = $this->MainModel->matchOTP($email, $otp);
-        if($status){
+        if ($status) {
+            $this->MainModel->deleteOTP($email);
+
             $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(200)
-                ->set_output(json_encode(['message' => 'OTP matched']));
-        }else{
+                ->set_output(json_encode(array('message' => 'OTP matched', 'success' => true)));
+        } else {
             $this->output
                 ->set_content_type('application/json')
                 ->set_status_header(500)
-                ->set_output(json_encode(['message' => 'OTP not matched']));
+                ->set_output(json_encode(array('message' => 'OTP not matched', 'success' => false)));
         }
     }
 
