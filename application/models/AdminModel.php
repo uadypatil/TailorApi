@@ -66,7 +66,7 @@ class AdminModel extends CI_Model
     }   // function ends
 
     // function to get all pending tailor requests
-    function getTailorPaindingRequestCount()
+    function getTailorPendingRequestCount()
     {
         $this->db->select("count(*) as tailorcount");
         $this->db->from("tailor");
