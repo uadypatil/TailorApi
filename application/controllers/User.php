@@ -88,9 +88,14 @@ class User extends CI_Controller
     function getExperiencedTailorData()
     {
         $data = $this->UserModel->getExperiencedTailorData();
-        $response = ($data) ?
-            array("status" => "Success", "data" => $data) :
-            array("status" => "Error", "message" => "No experienced tailors found");
+
+        if ($data) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "Success", "data" => $data);
+        } else {
+            $this->output->set_status_header(400);
+            $response = array("status" => "Error", "message" => "No experienced tailors found");
+        }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
