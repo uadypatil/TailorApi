@@ -195,6 +195,5 @@ class TailorModel extends CI_Model
 
 
 
-    // function to change available status for tailor
 
 }

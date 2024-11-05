@@ -21,7 +21,16 @@ class Admin extends CI_Controller
     function getTotalTailorCount()
     {
         $count = $this->AdminModel->getTotalTailorCount();
-        $response = array("status" => "success", "tailor_count" => $count);
+        if ($count) {
+            $data = array(
+                "tailor_count" => $count
+            );
+            $this->output->set_status_header(200);
+            $response = array("status" => "success", "data"=>$data);
+        } else {
+            $this->output->set_status_header(400);
+            $response = array("status" => "Error", "message" => "Failed to fetch count");
+        }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
@@ -29,7 +38,17 @@ class Admin extends CI_Controller
     function getTotalUserCount()
     {
         $count = $this->AdminModel->getTotalUserCount();
-        $response = array("status" => "success", "user_count" => $count);
+
+        if ($count) {
+            $data = array(
+                "user_count" => $count
+            );
+            $this->output->set_status_header(200);
+            $response = array("status" => "success", "data"=>$data);
+        } else {
+            $this->output->set_status_header(400);
+            $response = array("status" => "Error", "message" => "Failed to fetch count");
+        }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
@@ -37,7 +56,18 @@ class Admin extends CI_Controller
     function getTailorPendingRequestCount()
     {
         $count = $this->AdminModel->getTailorPendingRequestCount();
-        $response = array("status" => "success", "pending_tailor_count" => $count);
+
+        if ($count) {
+            $data = array(
+                "pending_request_count" => $count
+            );
+            $this->output->set_status_header(200);
+            $response = array("status" => "success", "data"=>$data);
+        } else {
+            $this->output->set_status_header(400);
+            $response = array("status" => "Error", "message" => "Failed to fetch count");
+        }        
+
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
@@ -46,7 +76,7 @@ class Admin extends CI_Controller
     {
         $data = $this->AdminModel->getApprovedTailorList();
         if ($data) {
-            $response = array("status" => "success", "tailors" => $data);
+            $response = array("status" => "success", "data" => $data);
         } else {
             $response = array("status" => "error", "message" => "No approved tailors found.");
         }
@@ -58,7 +88,7 @@ class Admin extends CI_Controller
     {
         $data = $this->AdminModel->getTailorPendingRequests();
         if ($data) {
-            $response = array("status" => "success", "pending_tailors" => $data);
+            $response = array("status" => "success", "data" => $data);
         } else {
             $response = array("status" => "error", "message" => "No pending tailor requests found.");
         }
@@ -70,14 +100,15 @@ class Admin extends CI_Controller
     {
         $data = $this->AdminModel->getAdminProfileData();
         if ($data) {
-            $response = array("status" => "success", "admin_data" => $data);
+            $response = array("status" => "success", "data" => $data);
         } else {
             $response = array("status" => "error", "message" => "Admin profile data not found.");
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
-    // function to update admin password
+    
+    // function to update admin password'
     function updateAdminPassword()
     {
         if ($_SERVER['REQUEST_METHOD'] === "POST") {

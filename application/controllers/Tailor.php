@@ -28,7 +28,7 @@ class Tailor extends CI_Controller
         $data = $this->TailorModel->getTailorProfileDetailsById($id);
         if ($data != null) {
             $this->output->set_status_header(200);
-            $response = array("status" => "Success", "data" => $data, "message" => "Profile details fetched successfully");
+            $response = array("status" => "success", "data" => $data, "message" => "Profile details fetched successfully");
         } else {
             $this->output->set_status_header(404);
             $response = array("status" => "Error", "message" => "Tailor not found");
@@ -42,7 +42,7 @@ class Tailor extends CI_Controller
         $data = $this->input->post();
         $this->TailorModel->updateTailorAuthDetailsByAuthId($authId, $data);
         $this->output->set_status_header(200);
-        $response = array("status" => "Success", "message" => "Tailor authentication details updated");
+        $response = array("status" => "success", "message" => "Tailor authentication details updated");
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
@@ -52,7 +52,7 @@ class Tailor extends CI_Controller
         $data = $this->input->post();
         $this->TailorModel->updateTailorDetailsById($id, $data);
         $this->output->set_status_header(200);
-        $response = array("status" => "Success", "message" => "Tailor details updated successfully");
+        $response = array("status" => "success", "message" => "Tailor details updated successfully");
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
@@ -62,7 +62,7 @@ class Tailor extends CI_Controller
         $status = $this->TailorModel->deleteTailorRecordByTailorId($id);
         if ($status) {
             $this->output->set_status_header(200);
-            $response = array("status" => "Success", "message" => "Tailor record deleted successfully");
+            $response = array("status" => "success", "message" => "Tailor record deleted successfully");
         } else {
             $this->output->set_status_header(404);
             $response = array("status" => "Error", "message" => "Failed to delete tailor record");
@@ -76,7 +76,7 @@ class Tailor extends CI_Controller
         $data = $this->TailorModel->getFaqByTailorId($id);
         if ($data != null) {
             $this->output->set_status_header(200);
-            $response = array("status" => "Success", "data" => $data);
+            $response = array("status" => "success", "data" => $data);
         } else {
             $this->output->set_status_header(404);
             $response = array("status" => "Error", "message" => "No FAQs found for this tailor");
@@ -91,7 +91,7 @@ class Tailor extends CI_Controller
         $status = $this->TailorModel->addFaq($data);
         if ($status) {
             $this->output->set_status_header(201);
-            $response = array("status" => "Success", "message" => "FAQ added successfully");
+            $response = array("status" => "success", "message" => "FAQ added successfully");
         } else {
             $this->output->set_status_header(400);
             $response = array("status" => "Error", "message" => "Failed to add FAQ");
@@ -106,7 +106,7 @@ class Tailor extends CI_Controller
         $status = $this->TailorModel->updateFaqById($id, $data);
         if ($status) {
             $this->output->set_status_header(200);
-            $response = array("status" => "Success", "message" => "FAQ updated successfully");
+            $response = array("status" => "success", "message" => "FAQ updated successfully");
         } else {
             $this->output->set_status_header(404);
             $response = array("status" => "Error", "message" => "Failed to update FAQ");
@@ -120,7 +120,7 @@ class Tailor extends CI_Controller
         $status = $this->TailorModel->deleteFaqById($id);
         if ($status) {
             $this->output->set_status_header(200);
-            $response = array("status" => "Success", "message" => "FAQ deleted successfully");
+            $response = array("status" => "success", "message" => "FAQ deleted successfully");
         } else {
             $this->output->set_status_header(404);
             $response = array("status" => "Error", "message" => "Failed to delete FAQ");
@@ -136,7 +136,7 @@ class Tailor extends CI_Controller
         $status = $this->TailorModel->updatePasswordByAuthId($authId, $oldpass, $newpass);
         if ($status) {
             $this->output->set_status_header(200);
-            $response = array("status" => "Success", "message" => "Password updated successfully");
+            $response = array("status" => "success", "message" => "Password updated successfully");
         } else {
             $this->output->set_status_header(404);
             $response = array("status" => "Error", "message" => "Failed to update password");
@@ -145,16 +145,16 @@ class Tailor extends CI_Controller
     }   // function ends
 
     // function to contact to admin
-    function contactAdmin()
+    function contactAdminPost()
     {
         $data = $this->input->post();
         $status = $this->TailorModel->addConactUsPost($data);
         if ($status) {
             $this->output->set_status_header(201);
-            $response = array("status" => "Success", "message" => "Message sent to admin successfully");
+            $response = array("status" => "success", "data"=>array("message" => "Message sent to admin successfully"));
         } else {
             $this->output->set_status_header(400);
-            $response = array("status" => "Error", "message" => "Failed to send message");
+            $response = array("status" => "Error", "data"=>array("message" => "Failed to send message"));
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
@@ -164,7 +164,10 @@ class Tailor extends CI_Controller
     {
         $count = $this->TailorModel->getCountPendingOrdersByTailorId($tailorId);
         $this->output->set_status_header(200);
-        $response = array("status" => "Success", "count" => $count);
+        $data = array(
+            "count" => $count
+        );
+        $response = array("status" => "success", "data" => $data);
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
@@ -172,8 +175,12 @@ class Tailor extends CI_Controller
     function getApprovedOrdersCount($tailorId)
     {
         $count = $this->TailorModel->getApprovedOrdersCountByTailorId($tailorId);
+        
+        $data = array(
+            "count" => $count
+        );
         $this->output->set_status_header(200);
-        $response = array("status" => "Success", "data" => $count);
+        $response = array("status" => "success", "data" => $data);
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
@@ -181,8 +188,12 @@ class Tailor extends CI_Controller
     function getCompletedOrdersCount($tailorId)
     {
         $count = $this->TailorModel->getCompletedOrdersCountByTailorId($tailorId);
+        
+        $data = array(
+            "count" => $count
+        );
         $this->output->set_status_header(200);
-        $response = array("status" => "Success", "data" => $count);
+        $response = array("status" => "success", "data" => $data);
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
@@ -192,7 +203,7 @@ class Tailor extends CI_Controller
         $data = $this->TailorModel->getAppointmentsByTailorId($tailorId);
         if ($data != null) {
             $this->output->set_status_header(200);
-            $response = array("status" => "Success", "data" => $data);
+            $response = array("status" => "success", "data" => $data);
         } else {
             $this->output->set_status_header(404);
             $response = array("status" => "Error", "message" => "No appointments found");
@@ -206,7 +217,7 @@ class Tailor extends CI_Controller
         $data = $this->TailorModel->getAllReviewsByTailorId($tailorId);
         if ($data != null) {
             $this->output->set_status_header(200);
-            $response = array("status" => "Success", "data" => $data);
+            $response = array("status" => "success", "data" => $data);
         } else {
             $this->output->set_status_header(404);
             $response = array("status" => "Error", "message" => "No reviews found");

@@ -166,9 +166,14 @@ class User extends CI_Controller
     {
         $data = $this->input->post();
         $status = $this->UserModel->updateAppintment($id, $data);
-        $response = ($status) ?
-            array("status" => "Success", "message" => "Appointment updated") :
-            array("status" => "Error", "message" => "Failed to update appointment");
+
+        if ($status) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "Success", "message" => "Appointment updated");
+        } else {
+            $this->output->set_status_header(400);
+            $response = array("status" => "Error", "message" => "Failed to update appointment");
+        }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
@@ -183,14 +188,5 @@ class User extends CI_Controller
             array("status" => "Error", "message" => "Failed to submit feedback");
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends    
-
-
-
-
-
-
-
-
-
 
 }

@@ -31,10 +31,10 @@ class Main extends CI_Controller
 
             if ($user != null) {
                 $this->output->set_status_header(200);
-                $response = array("status" => "Success", "data" => $user, "message" => "Login Successfull");
+                $response = array("status" => "success", "data" => $user, "message" => "Login Successfull");
             } else {
                 $this->output->set_status_header(404);
-                $response = array("status" => "Error", "message" => "Wrong Credentials");
+                $response = array("status" => "error", "message" => "Wrong Credentials");
             }
         } else {
             $this->output->set_status_header(405);
