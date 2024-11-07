@@ -90,6 +90,7 @@ class MainModel extends CI_Model
             $this->db->join("tailor", "auth.id = tailor.authid");
             $this->db->where("auth.email", $email);
             $this->db->where("auth.password", $password);
+            $this->db->where("tailor.requeststatus", "approved");
             $userdata = $this->db->get()->row();
         } else if ($type == "admin") {     // for admin
             $this->db->where("email", $email);
@@ -128,10 +129,10 @@ class MainModel extends CI_Model
     function getuserByEmail($email)
     {
         $this->db->where(array(
-            "email"=>$email
+            "email" => $email
         ));
         $user = $this->db->get("auth");
-        
+
         if ($user != null) {
             return $user;
         }
@@ -185,7 +186,7 @@ class MainModel extends CI_Model
     {
         $this->db->set('password', $password);
         $this->db->where(array(
-            "email"=>$email
+            "email" => $email
         ));
         return $this->db->update("auth");
     }
@@ -198,48 +199,69 @@ class MainModel extends CI_Model
     //      reset password ends
 
     // function to save otp in otptabe
-    function addOTP($mail, $otp, $expires_at){
+    function addOTP($mail, $otp, $expires_at)
+    {
         $status = $this->db->insert("otptable", array(
-            "email"=>$mail,
-            "otp"=>$otp,
-            "expires_at"=>$expires_at
+            "email" => $mail,
+            "otp" => $otp,
+            "expires_at" => $expires_at
         ));
 
         return $status;
     }   //  function ends
 
     // function to match otp
-    function matchOTP($email, $otp){
+    function matchOTP($email, $otp)
+    {
         $this->db->where("email", $email);
         $this->db->where("otp", $otp);
         $data = $this->db->get("otptable")->row();
 
-        if($data){
+        if ($data) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }   // function ends
 
     // function to delete generated otp
-    function deleteOTP($email){
-        $this->db->where("email",$email);
+    function deleteOTP($email)
+    {
+        $this->db->where("email", $email);
         $status = $this->db->delete("otptable");
-        return $status; 
+        return $status;
     }   // function ends
 
     // function to check mail exists or not
-    function isMailExist($email){
+    function isMailExist($email)
+    {
         $this->db->where("email", $email);
         $status = $this->db->get("auth")->row();
-        if($status){
+        if ($status) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }   // function ends
 
 
+    // function to update otp
+    public function updateOTP($email, $otp, $expires_at)
+    {
+        $data = array(
+            'otp' => $otp,
+            'expires_at' => $expires_at
+        );
+        $this->db->where('email', $email);
+        return $this->db->update('otptable', $data);
+    }   // function ends
+
+    // function to update password by email
+    function UpdatePasswordByMail($email, $passwordData)
+    {
+        $this->db->where("Email", $email);
+        return $this->db->update("auth", $passwordData);
+    }   // function ends
 
 
 }

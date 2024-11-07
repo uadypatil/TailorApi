@@ -358,4 +358,115 @@ class Main extends CI_Controller
         $randomnum = rand(1000, 9999);
         return $randomnum;
     }   // function ends
+
+
+    // function to reset password
+    function ResetPassword()
+    {
+        $email = $this->input->post("email");
+        $newPassword = $this->input->post("password");
+
+        if (!empty($email) && !empty($newPassword)) {
+            // Encrypt the new password
+            $passwordData = array("Password" => $this->UserModel->encryptData($newPassword));
+
+            // Update the password in the database
+            if ($this->UserModel->UpdatePasswordByMail($email, $passwordData)) {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(200)
+                    ->set_output(json_encode([
+                        'success' => true,
+                        'message' => 'Password updated successfully'
+                    ]));
+            } else {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(500)
+                    ->set_output(json_encode([
+                        'success' => false,
+                        'message' => 'Failed to update password, please try again.'
+                    ]));
+            }
+        } else {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode([
+                    'success' => false,
+                    'message' => 'Email and password fields cannot be empty.'
+                ]));
+        }
+    }
+
+
+    // function to resend OTP
+    public function resendOTP()
+    {
+        $email = $this->input->post("email");
+
+        if (!empty($email)) {
+            // Check if the email exists
+            if ($this->UserModel->isMailExist($email)) {
+                // Generate a new OTP
+                $otp = $this->generateOTP();
+                $expires_at = date("Y-m-d H:i:s", strtotime('+3 minutes'));
+
+                // Update OTP and expiration in the database
+                if ($this->UserModel->updateOTP($email, $otp, $expires_at)) {
+                    // Send the new OTP via email
+                    $mail = $this->phpmailer_lib->load();
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'amplifierlover007@gmail.com'; // Your email
+                    $mail->Password = 'irjw yygg kfni dnue'; // Your email password
+                    $mail->SMTPSecure = 'tls'; // 'tls' for port 587
+                    $mail->Port = 587; // Port for 'tls'
+                    $mail->setFrom('amplifierlover007@gmail.com', 'Team Sevakalpak');
+                    $mail->addAddress($email);
+
+                    $mail->Subject = 'Resent OTP Verification by Team Sevakalpak';
+                    $mail->isHTML(true);
+
+                    // Create email body content
+                    $mailContent = "<h1>Your OTP Code</h1>
+                    <h3>for verifying your email</h3>
+                    <p>Your OTP for email verification is: <strong>{$otp}</strong>. Please keep it secure and do not share it with anyone.</p>
+                    <p>Thank You</p>
+                    <p>Best Regards</p>
+                    <h3>Team SevaKalpak</h3>";
+                    $mail->Body = $mailContent;
+
+                    // Send email and handle the result
+                    if ($mail->send()) {
+                        $this->output
+                            ->set_content_type('application/json')
+                            ->set_status_header(200)
+                            ->set_output(json_encode(['success' => true, 'message' => 'OTP resent successfully.']));
+                    } else {
+                        $this->output
+                            ->set_content_type('application/json')
+                            ->set_status_header(500)
+                            ->set_output(json_encode(['success' => false, 'message' => 'Failed to resend OTP.']));
+                    }
+                } else {
+                    $this->output
+                        ->set_content_type('application/json')
+                        ->set_status_header(500)
+                        ->set_output(json_encode(['success' => false, 'message' => 'Failed to update OTP in the system.']));
+                }
+            } else {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(404)
+                    ->set_output(json_encode(['success' => false, 'message' => 'Email does not exist in our records.']));
+            }
+        } else {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_status_header(400)
+                ->set_output(json_encode(['success' => false, 'message' => 'No email provided.']));
+        }
+    }
 }

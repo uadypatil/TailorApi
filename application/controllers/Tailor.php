@@ -223,15 +223,6 @@ class Tailor extends CI_Controller
             $response = array("status" => "Error", "message" => "No reviews found");
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
-    }   // function ends
-
-
-
-
-
-
-
-
-
+    }   // function ends    
 
 }

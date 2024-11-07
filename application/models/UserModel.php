@@ -16,7 +16,7 @@ class UserModel extends CI_Model
     // function to get user profile data
     function getUserProfileData($id)
     {
-        $this->db->select("auth.*, user.*");
+        $this->db->select("auth.*, user.*,auth.*, user.*");
         $this->db->from("user");
         $this->db->join("auth", "user.authid = auth.id");
         $this->db->where("user.id", $id);
@@ -62,7 +62,7 @@ class UserModel extends CI_Model
     // function to get experienced tailors
     function getExperiencedTailorData()
     {
-        $this->db->select("auth.*, tailor.*");
+        $this->db->select("auth.*, tailor.*, auth.id as authid, tailor.id as tailorid");
         $this->db->from("tailor");
         $this->db->join("auth", "auth.id = tailor.authid");
         $this->db->order_by("experience", "DESC");
@@ -121,7 +121,7 @@ class UserModel extends CI_Model
     function getAppointmentsByUserId($userid)
     {
         $this->db->select("appointments.*, auth.contactno, tailor.name, tailor.profilepic, tailor.certification");
-        $this->db->select("IFNULL(SUM(review.stars), 0) as rating"); 
+        $this->db->select("IFNULL(AVG(review.stars), 0) as rating");
         $this->db->from("appointments");
         $this->db->join("tailor", "tailor.id = appointments.tailorid");
         $this->db->join("auth", "auth.id = tailor.id");
@@ -170,5 +170,34 @@ class UserModel extends CI_Model
         return $status;
     }   // function ends
 
+    // function to search for location
+    function searchLoc($search_term)
+    {
+        $this->db->select("auth.id as authid, auth.email as email, auth.contactno, 
+            tilor.id as tailorid, tailor.name, tailor.experience, tailor.specialization, 
+            tailor.profilepic, tailor.certification, adress.*");
+        $this->db->from("address");
+        $this->db->join("tailor", "tailor.id = address.tailorid");
+        $this->db->join("auth", "auth.id = tailor.authid");
 
+        
+
+        
+        if (!empty($location)) {
+            $this->db->like("tailorid", $search_term);
+            $this->db->or_like("landmark", $search_term);
+            $this->db->or_like("district", $search_term);
+            $this->db->or_like("town", $search_term);
+            $this->db->or_like("village", $search_term);
+            $this->db->or_like("state", $search_term);
+            $this->db->or_like("pincode", $search_term);
+        }
+        
+        if (!empty($service)) {
+            $this->db->where('eventmanager.service', $service);
+        }
+
+        $data = $this->db->get()->result();
+        return $data;
+    }
 }
