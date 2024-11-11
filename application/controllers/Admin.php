@@ -23,7 +23,7 @@ class Admin extends CI_Controller
         $count = $this->AdminModel->getTotalTailorCount();
         if ($count) {
             $data = array(
-                "tailor_count" => $count
+                "tailor_count" => $count->usercount
             );
             $this->output->set_status_header(200);
             $response = array("status" => "success", "data"=>$data);
@@ -41,7 +41,7 @@ class Admin extends CI_Controller
 
         if ($count) {
             $data = array(
-                "user_count" => $count
+                "user_count" => $count->usercount
             );
             $this->output->set_status_header(200);
             $response = array("status" => "success", "data"=>$data);
@@ -59,7 +59,7 @@ class Admin extends CI_Controller
 
         if ($count) {
             $data = array(
-                "pending_request_count" => $count
+                "pending_request_count" => $count->tailorcount
             );
             $this->output->set_status_header(200);
             $response = array("status" => "success", "data"=>$data);

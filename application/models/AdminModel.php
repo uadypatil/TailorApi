@@ -40,13 +40,14 @@ class AdminModel extends CI_Model
     {
         $this->db->select("count(*) as tailorcount");
         $this->db->from("tailor");
-        $this->db->join("auth", "auth.id = tailor.authid");
+        $this->db->join("auth", "auth.id = tailor.authid", "left");
         $this->db->where("tailor.requeststatus", "accepted");
         $countdata = $this->db->get()->row();
-        if ($countdata != null && $countdata->tailorcount > 0) {
-            return $countdata->tailorcount;
+        
+        if ($countdata && isset($countdata->tailorcount)) {
+            return $countdata;
         } else {
-            return 0;
+            return (object) ['tailorcount' => 0];
         }
     }   // function ends
 
@@ -55,13 +56,15 @@ class AdminModel extends CI_Model
     {
         $this->db->select("count(*) as usercount");
         $this->db->from("user");
-        $this->db->join("auth", "auth.id = user.authid");
-        // $this->db->where("user.requeststatus", "accepted");
+        $this->db->join("auth", "auth.id = user.authid", "left");
+        // $this->db->where-("user.requeststatus", "accepted");
         $countdata = $this->db->get()->row();
-        if ($countdata != null && $countdata->usercount > 0) {
-            return $countdata->usercount;
+
+        if ($countdata && isset($countdata->usercount)) {
+            return $countdata;
         } else {
-            return 0;
+            // Return a default object with usercount set to 0 if the result is null
+            return (object) ['usercount' => 0];
         }
     }   // function ends
 
@@ -70,13 +73,15 @@ class AdminModel extends CI_Model
     {
         $this->db->select("count(*) as tailorcount");
         $this->db->from("tailor");
-        $this->db->join("auth", "auth.id = tailor.authid");
+        $this->db->join("auth", "auth.id = tailor.authid", "left");
         $this->db->where("tailor.requeststatus", "pending");
         $countdata = $this->db->get()->row();
-        if ($countdata != null && $countdata->tailorcount > 0) {
-            return $countdata->tailorcount;
+        
+        if ($countdata && isset($countdata->tailorcount)) {
+            return $countdata;
         } else {
-            return 0;
+            // Return a default object with usercount set to 0 if the result is null
+            return (object) ['tailorcount' => 0];
         }
     }   // function ends
 

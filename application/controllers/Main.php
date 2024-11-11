@@ -18,6 +18,9 @@ class Main extends CI_Controller
 
         // php mailer library        
         $this->load->library('phpmailer_lib');
+
+        $this->load->Model("AdminModel");
+        $this->AdminModel->autocreateAdmin();
     }
 
 
