@@ -40,12 +40,12 @@ class AdminModel extends CI_Model
     {
         $this->db->select("count(*) as tailorcount");
         $this->db->from("tailor");
-        $this->db->join("auth", "auth.id = tailor.authid", "left");
-        $this->db->where("tailor.requeststatus", "accepted");
+        $this->db->join("auth", "auth.id = tailor.authid");
+        $this->db->where("tailor.requeststatus", "approved");
         $countdata = $this->db->get()->row();
         
         if ($countdata && isset($countdata->tailorcount)) {
-            return $countdata;
+            return (object) ['tailorcount' => $countdata->tailorcount];
         } else {
             return (object) ['tailorcount' => 0];
         }
@@ -61,7 +61,7 @@ class AdminModel extends CI_Model
         $countdata = $this->db->get()->row();
 
         if ($countdata && isset($countdata->usercount)) {
-            return $countdata;
+            return (object) ['usercount' => $countdata->usercount];
         } else {
             // Return a default object with usercount set to 0 if the result is null
             return (object) ['usercount' => 0];
@@ -73,7 +73,7 @@ class AdminModel extends CI_Model
     {
         $this->db->select("count(*) as tailorcount");
         $this->db->from("tailor");
-        $this->db->join("auth", "auth.id = tailor.authid", "left");
+        $this->db->join("auth", "auth.id = tailor.authid");
         $this->db->where("tailor.requeststatus", "pending");
         $countdata = $this->db->get()->row();
         
@@ -90,8 +90,8 @@ class AdminModel extends CI_Model
     {
         $this->db->select("auth.*, tailor.*");
         $this->db->from("tailor");
-        $this->db->join("auth", "auth.id = tailor.id");
-        $this->db->where("tailor.requeststatus", "accepted");
+        $this->db->join("auth", "auth.id = tailor.authid");
+        $this->db->where("tailor.requeststatus", "approved");
         $data = $this->db->get()->result();
         if ($data != null) {
             return $data;
@@ -105,7 +105,7 @@ class AdminModel extends CI_Model
     {
         $this->db->select("auth.*, tailor.*");
         $this->db->from("tailor");
-        $this->db->join("auth", "auth.id = tailor.id");
+        $this->db->join("auth", "auth.id = tailor.authid");
         $this->db->where("tailor.requeststatus", "pending");
         $data = $this->db->get()->result();
         if ($data != null) {
@@ -140,6 +140,14 @@ class AdminModel extends CI_Model
         } else {
             return false;
         }
+    }   // function ends
+
+    // function to toggele tailor request
+    function ToggleTailorRequest($tailorid, $action){
+        $this->db->where("id", $tailorid);
+        $this->db->set(array("requeststatus"=>$action));
+        $this->db->update("tailor");
+
     }   // function ends
 
 }

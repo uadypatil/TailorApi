@@ -23,10 +23,10 @@ class Admin extends CI_Controller
         $count = $this->AdminModel->getTotalTailorCount();
         if ($count) {
             $data = array(
-                "tailor_count" => $count->usercount
+                "tailor_count" => $count->tailorcount
             );
             $this->output->set_status_header(200);
-            $response = array("status" => "success", "data"=>$data);
+            $response = array("status" => "success", "data" => $data);
         } else {
             $this->output->set_status_header(400);
             $response = array("status" => "Error", "message" => "Failed to fetch count");
@@ -44,7 +44,7 @@ class Admin extends CI_Controller
                 "user_count" => $count->usercount
             );
             $this->output->set_status_header(200);
-            $response = array("status" => "success", "data"=>$data);
+            $response = array("status" => "success", "data" => $data);
         } else {
             $this->output->set_status_header(400);
             $response = array("status" => "Error", "message" => "Failed to fetch count");
@@ -62,52 +62,73 @@ class Admin extends CI_Controller
                 "pending_request_count" => $count->tailorcount
             );
             $this->output->set_status_header(200);
-            $response = array("status" => "success", "data"=>$data);
+            $response = array("status" => "success", "data" => $data);
         } else {
             $this->output->set_status_header(400);
             $response = array("status" => "Error", "message" => "Failed to fetch count");
-        }        
+        }
 
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
-
-    // function to fetch approved tailor list
+    // Function to fetch approved tailor list
     function getApprovedTailorList()
     {
-        $data = $this->AdminModel->getApprovedTailorList();
-        if ($data) {
-            $response = array("status" => "success", "data" => $data);
+        if ($_SERVER['REQUEST_METHOD'] === "GET") {
+            $data = $this->AdminModel->getApprovedTailorList();
+            if ($data) {
+                $this->output->set_status_header(200);
+                $response = array("status" => "success", "data" => $data);
+            } else {
+                $this->output->set_status_header(404);
+                $response = array("status" => "error", "message" => "No approved tailors found.");
+            }
         } else {
-            $response = array("status" => "error", "message" => "No approved tailors found.");
+            $this->output->set_status_header(405);
+            $response = array("status" => "error", "message" => "Invalid request method.");
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
-    }   // function ends
+    }
 
-    // function to get tailor pending request records
+    // Function to get tailor pending request records
     function getTailorPendingRequests()
     {
-        $data = $this->AdminModel->getTailorPendingRequests();
-        if ($data) {
-            $response = array("status" => "success", "data" => $data);
+        if ($_SERVER['REQUEST_METHOD'] === "GET") {
+            $data = $this->AdminModel->getTailorPendingRequests();
+            if ($data) {
+                $this->output->set_status_header(200);
+                $response = array("status" => "success", "data" => $data);
+            } else {
+                $this->output->set_status_header(404);
+                $response = array("status" => "error", "message" => "No pending tailor requests found.");
+            }
         } else {
-            $response = array("status" => "error", "message" => "No pending tailor requests found.");
+            $this->output->set_status_header(405);
+            $response = array("status" => "error", "message" => "Invalid request method.");
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
-    }   // function ends
+    }
 
-    //  function to get admin  profile data
+    // Function to get admin profile data
     function getAdminProfileData()
     {
-        $data = $this->AdminModel->getAdminProfileData();
-        if ($data) {
-            $response = array("status" => "success", "data" => $data);
+        if ($_SERVER['REQUEST_METHOD'] === "GET") {
+            $data = $this->AdminModel->getAdminProfileData();
+            if ($data) {
+                $this->output->set_status_header(200);
+                $response = array("status" => "success", "data" => $data);
+            } else {
+                $this->output->set_status_header(404);
+                $response = array("status" => "error", "message" => "Admin profile data not found.");
+            }
         } else {
-            $response = array("status" => "error", "message" => "Admin profile data not found.");
+            $this->output->set_status_header(405);
+            $response = array("status" => "error", "message" => "Invalid request method.");
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
-    }   // function ends
+    }
 
-    
+
+
     // function to update admin password'
     function updateAdminPassword()
     {
@@ -136,7 +157,24 @@ class Admin extends CI_Controller
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
-
+    // function to toggle tailors request at admin side
+    function ToggleTailorRequest($tailorid, $action)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === "GET") {
+            $result = $this->AdminModel->ToggleTailorRequest($tailorid, $action);
+            if ($result) {
+                $this->output->set_status_header(200);
+                $response = array("status" => "success", "message" => "Status is updated.");
+            } else {
+                $this->output->set_status_header(400);
+                $response = array("status" => "error", "message" => "Failed to update status.");
+            }
+        } else {
+            $this->output->set_status_header(405);
+            $response = array("status" => "error", "message" => "Invalid request method.");
+        }
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
 
 
 

@@ -40,19 +40,51 @@ class Tailor extends CI_Controller
     function updateTailorAuthDetails($authId)
     {
         $data = $this->input->post();
-        $this->TailorModel->updateTailorAuthDetailsByAuthId($authId, $data);
-        $this->output->set_status_header(200);
-        $response = array("status" => "success", "message" => "Tailor authentication details updated");
+        $status = $this->TailorModel->updateTailorAuthDetailsByAuthId($authId, $data);
+        
+        if ($status) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "success", "message" => "Tailor Authentication details updated successfully");
+        } else {
+            $this->output->set_status_header(400);
+            $response = array("status" => "error", "message" => "Failed to update tailor data");
+        }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
+
     }   // function ends
 
     // function to update tailor details
     function updateTailorDetails($id)
     {
-        $data = $this->input->post();
-        $this->TailorModel->updateTailorDetailsById($id, $data);
-        $this->output->set_status_header(200);
-        $response = array("status" => "success", "message" => "Tailor details updated successfully");
+        $formdata = $this->input->post();
+
+        $config['upload_path'] = 'uploads/tailor/profile/';
+        $config['allowed_types'] = 'jpg|jpeg|png|gif';
+        $config['max_size'] = 5120; // 5 MB in KB
+        $this->load->library('upload', $config);
+        $this->upload->initialize($config);
+
+        $data = []; // Initialize an array to hold the response data
+
+        // Check if a file is uploaded
+
+        if (isset($_FILES["document"])) {
+            if (!$this->upload->do_upload('document')) {
+                $data['error'] = $this->upload->display_errors();
+            } else {
+                $formdata['profilepic'] = $this->upload->data()['file_name'];
+            }
+        }
+
+        $status =  $this->TailorModel->updateTailorDetailsById($id, $formdata);
+
+        if ($status) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "success", "message" => "Tailor details updated successfully");
+        } else {
+            $this->output->set_status_header(400);
+            $response = array("status" => "error", "message" => "Failed to update tailor data");
+        }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
@@ -129,17 +161,17 @@ class Tailor extends CI_Controller
     }   // function ends
 
     // function to update password
-    function updatePassword($authId)
+    function UpdateTailorPassword($authId)
     {
-        $oldpass = $this->input->post('oldpass');
-        $newpass = $this->input->post('newpass');
+        $oldpass = $this->input->post('currentpassword');
+        $newpass = $this->input->post('newpassword');       
         $status = $this->TailorModel->updatePasswordByAuthId($authId, $oldpass, $newpass);
         if ($status) {
             $this->output->set_status_header(200);
             $response = array("status" => "success", "message" => "Password updated successfully");
         } else {
             $this->output->set_status_header(404);
-            $response = array("status" => "Error", "message" => "Failed to update password");
+            $response = array("status" => "error", "message" => "Failed to update password");
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
@@ -151,10 +183,10 @@ class Tailor extends CI_Controller
         $status = $this->TailorModel->addConactUsPost($data);
         if ($status) {
             $this->output->set_status_header(201);
-            $response = array("status" => "success", "data"=>array("message" => "Message sent to admin successfully"));
+            $response = array("status" => "success", "data" => array("message" => "Message sent to admin successfully"));
         } else {
             $this->output->set_status_header(400);
-            $response = array("status" => "Error", "data"=>array("message" => "Failed to send message"));
+            $response = array("status" => "Error", "data" => array("message" => "Failed to send message"));
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
@@ -175,7 +207,7 @@ class Tailor extends CI_Controller
     function getApprovedOrdersCount($tailorId)
     {
         $count = $this->TailorModel->getApprovedOrdersCountByTailorId($tailorId);
-        
+
         $data = array(
             "count" => $count
         );
@@ -188,7 +220,7 @@ class Tailor extends CI_Controller
     function getCompletedOrdersCount($tailorId)
     {
         $count = $this->TailorModel->getCompletedOrdersCountByTailorId($tailorId);
-        
+
         $data = array(
             "count" => $count
         );

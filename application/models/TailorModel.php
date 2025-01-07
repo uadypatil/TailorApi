@@ -30,9 +30,23 @@ class TailorModel extends CI_Model
     // function update tailor authentication detail
     function updateTailorAuthDetailsByAuthId($id, $data)
     {
-        $this->db->where("id", $id);
-        $this->db->set($data);
-        $this->db->update("auth");
+        $this->db->select("tailor.authid as authid");
+        $this->db->from("tailor");
+        $this->db->where("tailor.id", $id);
+        $authid = $this->db->get()->row();
+        if($authid != null){
+            $this->db->where("id", $authid->authid);
+            $this->db->set($data);
+            $returned = $this->db->update("auth");
+            if($returned != null){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+
     }   // function ends
 
     // function to update tailor details
@@ -40,7 +54,12 @@ class TailorModel extends CI_Model
     {
         $this->db->where("id", $id);
         $this->db->set($data);
-        $this->db->update("tailor");
+        $status = $this->db->update("tailor");
+        if($status != null){
+            return true;
+        }else{
+            return false;
+        }
     }   // function ends
 
     // function to delete tailor record
@@ -104,15 +123,29 @@ class TailorModel extends CI_Model
     }   // function ends
 
     // function to update the password for tailor
-    function updatePasswordByAuthId($id, $oldpass, $newpass)
+    function updatePasswordByAuthId($tailorid, $oldpass, $newpass)
     {
-        $this->db->where("id", $id);
-        $this->db->where("password", $this->MainModel->encryptData($oldpass));
-        $status = $this->db->update("auth", array(
-            "password" => $this->MainModel->encryptData($newpass)
-        ));
+        
+        $this->db->select("tailor.authid");
+        $this->db->from("tailor");
+        $this->db->where("tailor.id", $tailorid);
+        $data = $this->db->get()->row();
 
-        return $status;
+        if($data != null){
+            $this->db->where("id", $data->authid);
+            $this->db->where("password", $oldpass);
+            $this->db->set(array(
+                "password" => $newpass
+            ));
+            $status = $this->db->update("auth");
+            if($status){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
     }   // function ends
 
     // function to contact with admin for tailor

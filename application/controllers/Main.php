@@ -27,32 +27,52 @@ class Main extends CI_Controller
     function Login()
     {
         if ($_SERVER['REQUEST_METHOD'] === "POST") {
-            $email = $this->input->post("email");
-            $password = $this->MainModel->encryptData($this->input->post("password"));
-            $type = $this->input->post("type");
+            $formdata = $this->input->post();
+
+            // Validate input fields
+            if ($formdata == null) {
+                $this->output->set_status_header(400);
+                $response = array("status" => "error", "message" => "Missing required fields");
+                $this->output->set_content_type("application/json")->set_output(json_encode($response));
+                return;
+            }
+
+            $email = trim($formdata["email"]);
+            $password = $formdata["password"];
+            $type = trim($formdata["type"]);
+
+            // Authenticate user
             $user = $this->MainModel->AuthenticateLoginPost($email, $password, $type);
 
-            if ($user != null) {
+            if ($user !== null) {
+                // Generate token for authenticated user (optional)
+                $token = bin2hex(random_bytes(16)); // Example token
                 $this->output->set_status_header(200);
-                $response = array("status" => "success", "data" => $user, "message" => "Login Successfull");
+                $response = array(
+                    "status" => "success",
+                    "data" => $user,
+                    "token" => $token, // Include token in the response
+                    "message" => "Login successful"
+                );
             } else {
-                $this->output->set_status_header(404);
-                $response = array("status" => "error", "message" => "Wrong Credentials");
+                $this->output->set_status_header(401); // Unauthorized
+                $response = array("status" => "error", "message" => "Invalid credentials");
             }
         } else {
-            $this->output->set_status_header(405);
-            $response = array("status" => "error", "message" => "Bad Request");
+            $this->output->set_status_header(405); // Method Not Allowed
+            $response = array("status" => "error", "message" => "Request method not allowed");
         }
+
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }
-
-    // function for registration
-    function registrationPost()
+    
+    function RegistrationPost()
     {
         $returned = "";
         if ($_SERVER['REQUEST_METHOD'] === "POST") {
             $formdata = $this->input->post();
-            $formdata['password'] = $this->MainModel->encryptData($formdata["password"]);
+
+            // $formdata['password'] = $this->MainModel->encryptData($formdata["password"]);
 
             $authenticationdata = array(
                 'email' => $formdata['email'],
@@ -130,7 +150,7 @@ class Main extends CI_Controller
                 $response = array("status" => "Error", "message" => "Invalid User");
             } else if ($returned != null) {
                 $this->output->set_status_header(200);
-                $response = array("status" => "Success", "message" => "Registration Successfull");
+                $response = array("status" => "success", "message" => "Registration Successfull");
             } else {
                 $this->output->set_status_header(404);
                 $response = array("status" => "Error", "message" => "Failed to Register " . $authid . " | " . $returned);

@@ -29,10 +29,10 @@ class User extends CI_Controller
         $data = $this->UserModel->getUserProfileData($id);
         if ($data != null) {
             $this->output->set_status_header(200);
-            $response = array("status" => "Success", "data" => $data);
+            $response = array("status" => "success", "data" => $data);
         } else {
             $this->output->set_status_header(404);
-            $response = array("status" => "Error", "message" => "User not found");
+            $response = array("status" => "error", "message" => "User not found");
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
@@ -55,14 +55,33 @@ class User extends CI_Controller
     // Function to update user data
     function updateUserData($userId)
     {
-        $data = $this->input->post();
-        $status = $this->UserModel->updateUserData($userId, $data);
+        $formdata = $this->input->post();
+        
+        $config['upload_path'] = 'uploads/user/profile/';
+        $config['allowed_types'] = 'jpg|jpeg|png|gif';
+        $config['max_size'] = 5120; // 5 MB in KB
+        $this->load->library('upload', $config);
+        $this->upload->initialize($config);
+
+        $data = []; // Initialize an array to hold the response data
+
+        // Check if a file is uploaded
+
+        if (isset($_FILES["document"])) {
+            if (!$this->upload->do_upload('document')) {
+                $data['error'] = $this->upload->display_errors();
+            } else {
+                $formdata['profilepic'] = $this->upload->data()['file_name'];
+            }
+        }
+
+        $status = $this->UserModel->updateUserData($userId, $formdata);
         if ($status) {
             $this->output->set_status_header(200);
-            $response = array("status" => "Success", "message" => "User data updated");
+            $response = array("status" => "success", "message" => "User data updated");
         } else {
             $this->output->set_status_header(400);
-            $response = array("status" => "Error", "message" => "Failed to update user data");
+            $response = array("status" => "error", "message" => "Failed to update user data");
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
@@ -70,15 +89,16 @@ class User extends CI_Controller
     // Function to update password
     function updateUserPassword($authId)
     {
-        $oldPass = $this->input->post('oldpass');
-        $newPass = $this->input->post('newpass');
+        $oldPass = $this->input->post('currentpassword');
+        $newPass = $this->input->post('newpassword');
+
         $status = $this->UserModel->updateUserPassword($authId, $oldPass, $newPass);
         if ($status) {
             $this->output->set_status_header(200);
-            $response = array("status" => "Success", "message" => "Password updated");
+            $response = array("status" => "success", "message" => "Password updated");
         } else {
             $this->output->set_status_header(400);
-            $response = array("status" => "Error", "message" => "Failed to update password");
+            $response = array("status" => "error", "message" => "Failed to update password");
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends    
@@ -135,7 +155,7 @@ class User extends CI_Controller
     {
         $data = $this->UserModel->getAppointmentsByUserId($userId);
         $response = ($data) ?
-            array("status" => "Success", "data" => $data) :
+            array("status" => "success", "data" => $data) :
             array("status" => "Error", "message" => "No appointments found");
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends

@@ -47,15 +47,28 @@ class UserModel extends CI_Model
     }   // function ends
 
     // function to update password
-    function updateUserPassword($authid, $oldpass, $newpass)
+    function updateUserPassword($userid, $oldpass, $newpass)
     {
-        $this->db->where("id", $authid);
-        $this->db->where("password", $oldpass);
-        $this->db->set(array(
-            "password" => $newpass
-        ));
-        $status = $this->db->update("auth");
-        return $status;
+        $this->db->select("user.authid");
+        $this->db->from("user");
+        $this->db->where("user.id", $userid);
+        $data = $this->db->get()->row();
+
+        if ($data != null) {
+            $this->db->where("id", $data->authid);
+            $this->db->where("password", $oldpass);
+            $this->db->set(array(
+                "password" => $newpass
+            ));
+            $status = $this->db->update("auth");
+            if ($status) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }   // function ends
 
     /////////////////////////////////////////////////////////////////////////   tailors
@@ -121,13 +134,15 @@ class UserModel extends CI_Model
     function getAppointmentsByUserId($userid)
     {
         $this->db->select("appointments.*, auth.contactno, tailor.name, tailor.profilepic, tailor.certification");
-        $this->db->select("IFNULL(AVG(review.stars), 0) as rating");
+        $this->db->select("IFNULL(AVG(review.stars), 0) as rating"); // Calculate the average rating
         $this->db->from("appointments");
         $this->db->join("tailor", "tailor.id = appointments.tailorid");
-        $this->db->join("auth", "auth.id = tailor.id");
+        $this->db->join("auth", "auth.id = tailor.authid");
         $this->db->join("review", "review.tailorid = tailor.id", "left");
         $this->db->where("appointments.userid", $userid);
-        $this->db->group_by("appointments.id");
+        $this->db->group_by("appointments.id"); // Group by appointment ID to ensure proper aggregation
+        $this->db->order_by("appointments.id", "DESC"); // Optional: order results by appointment ID
+
         $data = $this->db->get()->result();
 
         // return $this->db->last_query();
@@ -180,9 +195,9 @@ class UserModel extends CI_Model
         $this->db->join("tailor", "tailor.id = address.tailorid");
         $this->db->join("auth", "auth.id = tailor.authid");
 
-        
 
-        
+
+
         if (!empty($location)) {
             $this->db->like("tailorid", $search_term);
             $this->db->or_like("landmark", $search_term);
@@ -192,7 +207,7 @@ class UserModel extends CI_Model
             $this->db->or_like("state", $search_term);
             $this->db->or_like("pincode", $search_term);
         }
-        
+
         if (!empty($service)) {
             $this->db->where('eventmanager.service', $service);
         }
