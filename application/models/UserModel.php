@@ -195,9 +195,6 @@ class UserModel extends CI_Model
         $this->db->join("tailor", "tailor.id = address.tailorid");
         $this->db->join("auth", "auth.id = tailor.authid");
 
-
-
-
         if (!empty($location)) {
             $this->db->like("tailorid", $search_term);
             $this->db->or_like("landmark", $search_term);
@@ -214,5 +211,45 @@ class UserModel extends CI_Model
 
         $data = $this->db->get()->result();
         return $data;
+    }
+
+    // function to get tailors by location and services
+    function getTailorByLocationService($location, $service)
+    {
+        $this->db->select("tailor.*");
+        $this->db->from("tailor");
+        // $this->db->like("specialization", $service);        // Others
+
+        // Check if the location is valid (not empty or default values)
+        if ($location != "" && $location != "All Location" && $location != "Others") {
+            $this->db->like("address", $location);
+        }
+
+        // Check if the service is valid (not empty or default values)
+        if ($service != "" && $service != "All Services" && $service != "Others") {
+            $this->db->like("specialization", $service);
+        }
+
+        $data = $this->db->get()->result();
+        if ($data != null) {
+            return $data;
+        } else {
+            return null;
+        }
+    }   // function ends
+
+    // function to get location for search
+    function getLocationsForSearch()
+    {
+        $this->db->select("`id`, `landmark`, `district`, `town`, `city`, `state`, `pincode`");
+        $this->db->from("address");
+        $this->db->group_by("landmark");
+        $this->db->order_by("landmark", "ASEC");
+        $data = $this->db->get()->result();
+        if ($data != null) {
+            return $data;
+        } else {
+            return null;
+        }
     }
 }

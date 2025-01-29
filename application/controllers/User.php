@@ -56,7 +56,7 @@ class User extends CI_Controller
     function updateUserData($userId)
     {
         $formdata = $this->input->post();
-        
+
         $config['upload_path'] = 'uploads/user/profile/';
         $config['allowed_types'] = 'jpg|jpeg|png|gif';
         $config['max_size'] = 5120; // 5 MB in KB
@@ -209,4 +209,25 @@ class User extends CI_Controller
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends    
 
+    // function to get tailors by location and service
+    function getTailorByLocationService()
+    {
+        $formdata = $this->input->post();
+        $location = $formdata['location'];
+        $service = $formdata['service'];
+        $data = $this->UserModel->getTailorByLocationService($location, $service);
+        $response = ($data) ?
+            array("status" => "Success", "message" => "Data Fetched successfully", "data" => $data) :
+            array("status" => "Error", "message" => "Failed to fetch data", "data" => null);
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    // function to get location for search 
+    function getLocationsForSearch(){
+        $data = $this->UserModel->getLocationsForSearch();
+        $response = ($data) ?
+            array("status" => "success", "data" => $data) :
+            array("status" => "Error", "message" => "No appointments found");
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends    
 }

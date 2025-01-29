@@ -41,7 +41,7 @@ class Tailor extends CI_Controller
     {
         $data = $this->input->post();
         $status = $this->TailorModel->updateTailorAuthDetailsByAuthId($authId, $data);
-        
+
         if ($status) {
             $this->output->set_status_header(200);
             $response = array("status" => "success", "message" => "Tailor Authentication details updated successfully");
@@ -50,7 +50,6 @@ class Tailor extends CI_Controller
             $response = array("status" => "error", "message" => "Failed to update tailor data");
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
-
     }   // function ends
 
     // function to update tailor details
@@ -77,6 +76,23 @@ class Tailor extends CI_Controller
         }
 
         $status =  $this->TailorModel->updateTailorDetailsById($id, $formdata);
+
+        if ($status) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "success", "message" => "Tailor details updated successfully");
+        } else {
+            $this->output->set_status_header(400);
+            $response = array("status" => "error", "message" => "Failed to update tailor data");
+        }
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    // function to update tailor address details
+    function updateTailorAddressDetails($tailorId)
+    {
+        $formdata = $this->input->post();
+
+        $status =  $this->TailorModel->updateTailorAddressDetails($tailorId, $formdata);
 
         if ($status) {
             $this->output->set_status_header(200);
@@ -164,7 +180,7 @@ class Tailor extends CI_Controller
     function UpdateTailorPassword($authId)
     {
         $oldpass = $this->input->post('currentpassword');
-        $newpass = $this->input->post('newpassword');       
+        $newpass = $this->input->post('newpassword');
         $status = $this->TailorModel->updatePasswordByAuthId($authId, $oldpass, $newpass);
         if ($status) {
             $this->output->set_status_header(200);
@@ -257,4 +273,31 @@ class Tailor extends CI_Controller
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends    
 
+    // function to get states
+    function getStates()
+    {
+        $data = $this->TailorModel->getStates();
+        if ($data != null) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "success", "data" => $data);
+        } else {
+            $this->output->set_status_header(404);
+            $response = array("status" => "Error", "message" => "No reviews found");
+        }
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function endsget 
+
+    // function to get states
+    function getCities()
+    {
+        $data = $this->TailorModel->getCities();
+        if ($data != null) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "success", "data" => $data);
+        } else {
+            $this->output->set_status_header(404);
+            $response = array("status" => "Error", "message" => "No reviews found");
+        }
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function endsgetCities
 }

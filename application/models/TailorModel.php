@@ -15,9 +15,10 @@ class TailorModel extends CI_Model
     // function to get tailor profile details
     function getTailorProfileDetailsById($id)
     {
-        $this->db->select("tailor.*, auth.*");
+        $this->db->select("tailor.*, auth.*, address.`landmark`, address.`district`, address.`town`, address.`city`, address.`state`, address.`pincode`, address.`gmap_link`");
         $this->db->from("tailor");
         $this->db->join("auth", "tailor.authid = auth.id");
+        $this->db->join("address", "address.tailorid = tailor.id", "left");
         $this->db->where("tailor.id", $id);
         $data = $this->db->get()->row();
         if ($data != null) {
@@ -34,19 +35,18 @@ class TailorModel extends CI_Model
         $this->db->from("tailor");
         $this->db->where("tailor.id", $id);
         $authid = $this->db->get()->row();
-        if($authid != null){
+        if ($authid != null) {
             $this->db->where("id", $authid->authid);
             $this->db->set($data);
             $returned = $this->db->update("auth");
-            if($returned != null){
+            if ($returned != null) {
                 return true;
-            }else{
+            } else {
                 return false;
             }
-        }else{
+        } else {
             return false;
         }
-
     }   // function ends
 
     // function to update tailor details
@@ -55,10 +55,33 @@ class TailorModel extends CI_Model
         $this->db->where("id", $id);
         $this->db->set($data);
         $status = $this->db->update("tailor");
-        if($status != null){
+        if ($status != null) {
             return true;
-        }else{
+        } else {
             return false;
+        }
+    }   // function ends
+
+    // function to update tailor address details
+    function updateTailorAddressDetails($tailorId, $formdata)
+    {
+        $this->db->where("tailorid", $tailorId);
+        $query = $this->db->get("address");
+
+        if ($query->num_rows() > 0) {
+            // Record exists, perform update
+            $this->db->where("tailorid", $tailorId);
+            $status = $this->db->update("address", $formdata);
+        } else {
+            // Record doesn't exist, perform insert
+            $formdata['tailorid'] = $tailorId; // Ensure tailorid is included in the insert data
+            $status = $this->db->insert("address", $formdata);
+        }
+
+        if ($status) {
+            return true; // Operation successful
+        } else {
+            return false; // Operation failed
         }
     }   // function ends
 
@@ -125,25 +148,25 @@ class TailorModel extends CI_Model
     // function to update the password for tailor
     function updatePasswordByAuthId($tailorid, $oldpass, $newpass)
     {
-        
+
         $this->db->select("tailor.authid");
         $this->db->from("tailor");
         $this->db->where("tailor.id", $tailorid);
         $data = $this->db->get()->row();
 
-        if($data != null){
+        if ($data != null) {
             $this->db->where("id", $data->authid);
             $this->db->where("password", $oldpass);
             $this->db->set(array(
                 "password" => $newpass
             ));
             $status = $this->db->update("auth");
-            if($status){
+            if ($status) {
                 return true;
-            }else{
+            } else {
                 return false;
             }
-        }else{
+        } else {
             return false;
         }
     }   // function ends
@@ -225,6 +248,16 @@ class TailorModel extends CI_Model
         }
     }   // function ends
 
+    // function to get states
+    function getStates(){
+        return $this->db->get("states")->result();
+    }   // function endsget 
+
+    // function to get states
+    function getCities(){
+        $this->db->order_by("city", "ASEC");
+        return $this->db->get("cities")->result();
+    }   // function endsget 
 
 
 
