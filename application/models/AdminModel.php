@@ -150,4 +150,16 @@ class AdminModel extends CI_Model
 
     }   // function ends
 
+    // function to get contact data
+    function getContactData(){
+        $this->db->select("*");
+        $this->db->from("contactform");
+        $this->db->order_by("id", "desc");
+        $data = $this->db->get()->result();
+        if($data != null){
+            return $data;
+        }else{
+            return null;
+        }
+    }   // function ends
 }

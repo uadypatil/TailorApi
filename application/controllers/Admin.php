@@ -176,7 +176,23 @@ class Admin extends CI_Controller
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
-
+    // function to get contact data
+    function getContactData(){
+        if ($_SERVER['REQUEST_METHOD'] === "GET") {
+            $data = $this->AdminModel->getContactData();
+            if ($data) {
+                $this->output->set_status_header(200);
+                $response = array("status" => "success", "data" => $data);
+            } else {
+                $this->output->set_status_header(400);
+                $response = array("status" => "error", "message" => "Failed to update status.");
+            }
+        } else {
+            $this->output->set_status_header(405);
+            $response = array("status" => "error", "message" => "Invalid request method.");
+        }
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
 
 
 

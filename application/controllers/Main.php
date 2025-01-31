@@ -65,14 +65,19 @@ class Main extends CI_Controller
 
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }
-    
+
     function RegistrationPost()
     {
         $returned = "";
-        if ($_SERVER['REQUEST_METHOD'] === "POST") {
+        if ($this->input->server('REQUEST_METHOD') === "POST") {
             $formdata = $this->input->post();
 
-            // $formdata['password'] = $this->MainModel->encryptData($formdata["password"]);
+            if (empty($formdata['email']) || empty($formdata['contactno']) || empty($formdata['password']) || empty($formdata['type'])) {
+                $this->output->set_status_header(400);
+                $response = array("status" => "Error", "message" => "Missing required fields");
+                $this->output->set_content_type("application/json")->set_output(json_encode($response));
+                return;
+            }
 
             $authenticationdata = array(
                 'email' => $formdata['email'],
@@ -82,84 +87,85 @@ class Main extends CI_Controller
             );
 
             $authid = $this->MainModel->AuthenticationPost($authenticationdata);
-            if ($authid != null) {
-                if ($authid == "contactno exist") {
-                    $this->output->set_status_header(404);
-                    $response = array("status" => "Error", "message" => "Contact Number Already Exist");
-                    $returned  = -1;
-                } else if ($authid == "email exist") {
-                    $this->output->set_status_header(404);
-                    $returned = -2;
-                } else {
 
-                    if ($formdata['type'] == "tailor") {
-                        // adding tailor data to array
-                        $tailordata = array(
-                            "authid" => $authid,
-                            "name" => $formdata['name'],
-                            "document_type" => $formdata['document_type']
-                        );
+            if ($authid === "contactno exist") {
+                $this->output->set_status_header(409);
+                $response = array("status" => "Error", "message" => "Contact Number Already Exists");
+                $returned  = -1;
+            } elseif ($authid === "email exist") {
+                $this->output->set_status_header(409);
+                $response = array("status" => "Error", "message" => "Email Already Exists");
+                $returned = -2;
+            } elseif ($authid > 0) {
+                if ($formdata['type'] === "tailor") {
+                    $tailordata = array(
+                        "authid" => $authid,
+                        "name" => $formdata['name'],
+                        "document_type" => $formdata['document_type'],
+                    );
 
-                        if (isset($formdata['shop_license'])) {
-                            $tailordata["shop_license"] = $formdata['shop_license'];
-                        }
+                    if (!empty($formdata['shop_license'])) {
+                        $tailordata["shop_license"] = $formdata['shop_license'];
+                    }
 
-
+                    if (!empty($_FILES['document']['name'])) {
                         $config['upload_path'] = 'uploads/tailor/documents';
                         $config['allowed_types'] = 'jpg|jpeg|png|gif';
-                        $config['max_size'] = 51200; // 50 MB in KB
+                        $config['max_size'] = 51200;
+
                         $this->load->library('upload', $config);
                         $this->upload->initialize($config);
 
-                        $data = []; // Initialize an array to hold the response data
-
-                        // Check if a file is uploaded
-
-                        if (isset($_FILES["document"])) {
-                            if (!$this->upload->do_upload('document')) {
-                                $data['error'] = $this->upload->display_errors();
-                                print_r($data);
-                            } else {
-                                $data['upload_data'] = $this->upload->data();
-                                $tailordata['document'] = $data['upload_data']['file_name'];
-                            }
+                        if ($this->upload->do_upload('document')) {
+                            $upload_data = $this->upload->data();
+                            $tailordata['document'] = $upload_data['file_name'];
+                        } else {
+                            $this->output->set_status_header(400);
+                            $response = array("status" => "Error", "message" => $this->upload->display_errors());
+                            $this->output->set_content_type("application/json")->set_output(json_encode($response));
+                            return;
                         }
-
-
-                        $returned = $this->MainModel->setTailorDataPost($tailordata);
-                    } else if ($formdata['type'] == "user") {
-                        // adding userdata to array
-                        $userdata = array(
-                            "authid" => $authid,
-                            "name" => $formdata['name']
-                        );
-
-                        $returned = $this->MainModel->setUserDataPost($userdata);
-                    } else {
-                        $returned = -3;
                     }
+
+                    $returned = $this->MainModel->setTailorDataPost($tailordata);
+
+                    $this->output->set_status_header(200);
+                    $response = array("status" => "Success", "message" => "Registration Successful");
+                    $this->output->set_content_type("application/json")->set_output(json_encode($response));
+
+                } elseif ($formdata['type'] === "user") {
+                    $userdata = array(
+                        "authid" => $authid,
+                        "name" => $formdata['name']
+                    );
+                    $returned = $this->MainModel->setUserDataPost($userdata);
+
+                    $this->output->set_status_header(200);
+                    $response = array("status" => "Success", "message" => "Registration Successful");
+                    $this->output->set_content_type("application/json")->set_output(json_encode($response));
+
+                } else {
+                    $this->output->set_status_header(400);
+                    $response = array("status" => "Error", "message" => "Invalid User Type");
+                    // $returned = -3;
+                    $this->output->set_content_type("application/json")->set_output(json_encode($response));
                 }
+            } else {
+                $response = array("status" => "Error", "message" => "Failed to Register");
+                $this->output->set_status_header(500);
+                $this->output->set_content_type("application/json")->set_output(json_encode($response));
             }
 
-            // $user = $this->MainModel->loginValidation($username, $password, $role);
-            if ($returned === -1) {
-                $response = array("status" => "Error", "message" => "Contact number already exist");
-            } else if ($returned === -2) {
-                $response = array("status" => "Error", "message" => "Email already exist");
-            } else if ($returned === -3) {
-                $response = array("status" => "Error", "message" => "Invalid User");
-            } else if ($returned != null) {
-                $this->output->set_status_header(200);
-                $response = array("status" => "success", "message" => "Registration Successfull");
-            } else {
-                $this->output->set_status_header(404);
-                $response = array("status" => "Error", "message" => "Failed to Register " . $authid . " | " . $returned);
-            }
+            // if ($returned > 0) {
+            //     $this->output->set_status_header(200);
+            //     $response = array("status" => "Success", "message" => "Registration Successful");
+            //     $this->output->set_content_type("application/json")->set_output(json_encode($response));
+            // }
         } else {
             $this->output->set_status_header(405);
-            $response = array("status" => "error", "message" => "Bad Request");
+            $response = array("status" => "Error", "message" => "Method Not Allowed");
+            $this->output->set_content_type("application/json")->set_output(json_encode($response));
         }
-        $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }
 
 

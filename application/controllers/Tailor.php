@@ -245,6 +245,19 @@ class Tailor extends CI_Controller
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends
 
+    // function to get completed orders count
+    function UserRatingCount($tailorId)
+    {
+        $count = $this->TailorModel->UserRatingCountByTailorId($tailorId);
+
+        $data = array(
+            "count" => $count
+        );
+        $this->output->set_status_header(200);
+        $response = array("status" => "success", "data" => $data);
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
     // function to get appointments
     function getAppointments($tailorId)
     {
@@ -300,4 +313,44 @@ class Tailor extends CI_Controller
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function endsgetCities
+
+    // function to accept appointment request
+    function AcceptAppointment($id){
+        $status = $this->TailorModel->AcceptAppointment($id);
+        if ($status != null) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "success", "data" => "Request accepted successfully");
+        } else {
+            $this->output->set_status_header(404);
+            $response = array("status" => "Error", "data" => "Failed to accept appointment");
+        }
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
+
+    // function to get pending appointments
+    function getPendingAppointments($tailorId){
+        $data = $this->TailorModel->getPendingAppointments($tailorId);
+        if ($data != null) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "success", "data" => $data);
+        } else {
+            $this->output->set_status_header(404);
+            $response = array("status" => "Error", "message" => "No appointments found");
+        }
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // funciton ends
+
+    // function to accept appointment request
+    function CompleteAppointment($id){
+        $status = $this->TailorModel->CompleteAppointment($id);
+        if ($status != null) {
+            $this->output->set_status_header(200);
+            $response = array("status" => "success", "data" => "Request accepted successfully");
+        } else {
+            $this->output->set_status_header(404);
+            $response = array("status" => "Error", "data" => "Failed to accept appointment");
+        }
+        $this->output->set_content_type("application/json")->set_output(json_encode($response));
+    }   // function ends
 }
+

@@ -210,7 +210,7 @@ class TailorModel extends CI_Model
     function getTotalUserRatingByTailorId($id)
     {
         $this->db->select("sum(stars) as starssum");
-        $this->db->from("review");
+        $this->db->from("feedback");
         $this->db->where("tailorid", $id);
         $sum = $this->db->get();
         $totalrating = $sum->starssum / 5;
@@ -222,6 +222,7 @@ class TailorModel extends CI_Model
     function getAppointmentsByTailorId($id)
     {
         $this->db->where("tailorid", $id);
+        $this->db->where("bookingstatus !=", "pending");
         $data = $this->db->get("appointments")->result();
         if ($data != null) {
             return $data;
@@ -235,11 +236,11 @@ class TailorModel extends CI_Model
     // function to get all reviews
     function getAllReviewsByTailorId($id)
     {
-        $this->db->select("user.*, auth.*, review.*");
-        $this->db->from("review");
-        $this->db->join("user", "user.id = review.userid");
+        $this->db->select("user.*, auth.*, feedback.*");
+        $this->db->from("feedback");
+        $this->db->join("user", "user.id = feedback.userid");
         $this->db->join("auth", "user.authid = auth.id");
-        $this->db->where("review.tailorid", $id);
+        $this->db->where("feedback.tailorid", $id);
         $data = $this->db->get()->result();
         if ($data != null) {
             return $data;
@@ -259,7 +260,53 @@ class TailorModel extends CI_Model
         return $this->db->get("cities")->result();
     }   // function endsget 
 
+    // function to accept appointment request
+    function AcceptAppointment($id){
+        $this->db->set("bookingstatus", "approved");
+        $this->db->where("id", $id);
+        $status = $this->db->update("appointments");
+        if($status != null){
+            return $status;
+        }else{
+            return null;
+        }
+    }   // function ends
 
+    // function to get pending appointments
+    function getPendingAppointments($tailorId){
+        $this->db->where("tailorid", $tailorId);
+        $this->db->where("bookingstatus", "pending");
+        $data = $this->db->get("appointments")->result();
+        if ($data != null) {
+            return $data;
+        } else {
+            return null;
+        }
+    }   // function ends
 
+    // function to accept appointment request
+    function CompleteAppointment($id){
+        $this->db->set("completestatus", "completed");
+        $this->db->where("id", $id);
+        $status = $this->db->update("appointments");
+        if($status != null){
+            return $status;
+        }else{
+            return null;
+        }
+    }   // function ends
+
+    // function to get avg. user rating 
+    function UserRatingCountByTailorId($tailorId){
+        $this->db->select("avg(stars) as rating");
+        $this->db->where("tailorid", $tailorId);
+        $this->db->from("feedback");
+        $data = $this->db->get()->row();
+        if($data != null){
+            return number_format($data->rating, 1);
+        }else{
+            return 0;
+        }
+    }   // function ends
 
 }

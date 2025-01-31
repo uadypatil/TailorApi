@@ -95,10 +95,10 @@ class User extends CI_Controller
         $status = $this->UserModel->updateUserPassword($authId, $oldPass, $newPass);
         if ($status) {
             $this->output->set_status_header(200);
-            $response = array("status" => "success", "message" => "Password updated");
+            $response = array("status" => "Success", "message" => "Password updated");
         } else {
             $this->output->set_status_header(400);
-            $response = array("status" => "error", "message" => "Failed to update password");
+            $response = array("status" => "Error", "message" => "Failed to update password");
         }
         $this->output->set_content_type("application/json")->set_output(json_encode($response));
     }   // function ends    

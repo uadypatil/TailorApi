@@ -118,10 +118,10 @@ class UserModel extends CI_Model
     // function to get reviews by tailor id
     function getTailorReviewsByTailorId($tailorid)
     {
-        $this->db->select("user.profilepic, review.*");
-        $this->db->from("review");
-        $this->db->join("user", "user.id = review.userid");
-        $this->db->where("review.tailorid", $tailorid);
+        $this->db->select("user.profilepic, feedback.*");
+        $this->db->from("feedback");
+        $this->db->join("user", "user.id = feedback.userid");
+        $this->db->where("feedback.tailorid", $tailorid);
         $data = $this->db->get()->result();
         if ($data != null) {
             return $data;
@@ -134,11 +134,11 @@ class UserModel extends CI_Model
     function getAppointmentsByUserId($userid)
     {
         $this->db->select("appointments.*, auth.contactno, tailor.name, tailor.profilepic, tailor.certification");
-        $this->db->select("IFNULL(AVG(review.stars), 0) as rating"); // Calculate the average rating
+        $this->db->select("IFNULL(AVG(feedback.stars), 0) as rating"); // Calculate the average rating
         $this->db->from("appointments");
         $this->db->join("tailor", "tailor.id = appointments.tailorid");
         $this->db->join("auth", "auth.id = tailor.authid");
-        $this->db->join("review", "review.tailorid = tailor.id", "left");
+        $this->db->join("feedback", "feedback.tailorid = tailor.id", "left");
         $this->db->where("appointments.userid", $userid);
         $this->db->group_by("appointments.id"); // Group by appointment ID to ensure proper aggregation
         $this->db->order_by("appointments.id", "DESC"); // Optional: order results by appointment ID
